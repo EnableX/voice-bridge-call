@@ -5,7 +5,6 @@ const { readFileSync } = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const _ = require('lodash');
 // application modules
 const logger = require('./logger');
 const { makeOutboundCall, bridgeCall } = require('./voiceapi');
@@ -26,7 +25,7 @@ function shutdown() {
   }, 10000);
 }
 
-// Set webhook event url
+// Handle onListening event
 function onListening() {
   logger.info(`Listening on Port ${process.env.SERVICE_PORT}`);
 }
@@ -54,21 +53,27 @@ function onError(error) {
 // create and start an HTTPS node app server
 // An SSL Certificate (Self Signed or Registered) is required
 function createAppServer(serverPort) {
-  const options = {
-    key: readFileSync(process.env.CERTIFICATE_SSL_KEY).toString(),
-    cert: readFileSync(process.env.CERTIFICATE_SSL_CERT).toString(),
-  };
-  if (process.env.CERTIFICATE_SSL_CACERTS) {
-    options.ca = [];
-    options.ca.push(readFileSync(process.env.CERTIFICATE_SSL_CACERTS).toString());
-  }
+  if (process.env.ENABLEX_APP_ID
+      && process.env.ENABLEX_APP_KEY
+      && process.env.ENABLEX_OUTBOUND_NUMBER) {
+    const options = {
+      key: readFileSync(process.env.CERTIFICATE_SSL_KEY).toString(),
+      cert: readFileSync(process.env.CERTIFICATE_SSL_CERT).toString(),
+    };
+    if (process.env.CERTIFICATE_SSL_CACERTS) {
+      options.ca = [];
+      options.ca.push(readFileSync(process.env.CERTIFICATE_SSL_CACERTS).toString());
+    }
 
-  // Create https express server
-  server = createServer(options, app);
-  app.set('port', serverPort);
-  server.listen(serverPort);
-  server.on('error', onError);
-  server.on('listening', onListening);
+    // Create https express server
+    server = createServer(options, app);
+    app.set('port', serverPort);
+    server.listen(serverPort);
+    server.on('error', onError);
+    server.on('listening', onListening);
+  } else {
+    logger.error('Please set env variables - ENABLEX_APP_ID, ENABLEX_APP_KEY, ENABLEX_OUTBOUND_NUMBER');
+  }
 }
 
 /* Initializing WebServer */
@@ -92,9 +97,9 @@ app.post('/outbound-call', (req, res) => {
     const msg = JSON.parse(response);
     const callVoiceId = msg.voice_id;
     if (callVoiceId) {
-      bridgeCall(callVoiceId, req.body.toNumber, (response) => {
-        const msg = JSON.parse(response);
-        res.send(msg);
+      /* Initiating Bridging Call */
+      bridgeCall(callVoiceId, req.body.toNumber, (result) => {
+        res.send(JSON.parse(result));
         res.status(200);
       });
     } else {
