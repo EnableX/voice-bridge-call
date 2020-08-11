@@ -1,9 +1,9 @@
 {
-  "name": "enablexoutboundclient",
+  "name": "enablexbridgecall",
   "version": "1.0.0",
-  "description": "Enablex Outbound Client Example",
-  "main": "client-outbound.js",
-  "author": "amit.s",
+  "description": "EnableX Voice API - Bridge two outbound calls",
+  "main": "client-bridge-call.js",
+  "author": "rajesh.g@vcloudx.com",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
