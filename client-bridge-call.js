@@ -13,6 +13,7 @@ const { makeOutboundCall, bridgeCall } = require('./voiceapi');
 const app = express();
 
 let server;
+const servicePort = process.env.SERVICE_PORT || 5000;
 
 // shutdown the node server forcefully
 function shutdown() {
@@ -27,7 +28,7 @@ function shutdown() {
 
 // Handle onListening event
 function onListening() {
-  logger.info(`Listening on Port ${process.env.SERVICE_PORT}`);
+  logger.info(`Listening on Port ${servicePort}`);
 }
 
 // Handle error generated while creating / starting an http server
@@ -38,11 +39,11 @@ function onError(error) {
 
   switch (error.code) {
     case 'EACCES':
-      logger.error(`Port ${process.env.SERVICE_PORT} requires elevated privileges`);
+      logger.error(`Port ${servicePort} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      logger.error(`Port ${process.env.SERVICE_PORT} is already in use`);
+      logger.error(`Port ${servicePort} is already in use`);
       process.exit(1);
       break;
     default:
@@ -52,7 +53,7 @@ function onError(error) {
 
 // create and start an HTTPS node app server
 // An SSL Certificate (Self Signed or Registered) is required
-function createAppServer(serverPort) {
+function createAppServer() {
   if (process.env.ENABLEX_APP_ID
       && process.env.ENABLEX_APP_KEY
       && process.env.ENABLEX_OUTBOUND_NUMBER) {
@@ -67,8 +68,8 @@ function createAppServer(serverPort) {
 
     // Create https express server
     server = createServer(options, app);
-    app.set('port', serverPort);
-    server.listen(serverPort);
+    app.set('port', servicePort);
+    server.listen(servicePort);
     server.on('error', onError);
     server.on('listening', onListening);
   } else {
@@ -77,8 +78,7 @@ function createAppServer(serverPort) {
 }
 
 /* Initializing WebServer */
-const servicePort = process.env.SERVICE_PORT || 5000;
-createAppServer(servicePort);
+createAppServer();
 
 process.on('SIGINT', () => {
   logger.info('Caught interrupt signal');
