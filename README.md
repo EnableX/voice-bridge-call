@@ -35,6 +35,8 @@ This example contains instructions how users can initiate Outbound Calls to brid
     - `export CERTIFICATE_SSL_CERT=`
   - use the certificate CA[chain] [self signed or registered]
     - `export CERTIFICATE_SSL_CACERTS=`
+  - switch to the root of the project
+    - `cd ..`
 
 ## Starting the client application script
 - To start the service,
