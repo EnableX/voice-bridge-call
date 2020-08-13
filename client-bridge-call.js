@@ -1,6 +1,5 @@
 // core modules
-const { createServer } = require('https');
-const { readFileSync } = require('fs');
+const { createServer } = require('http');
 // modules installed from npm
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -57,14 +56,7 @@ function createAppServer() {
   if (process.env.ENABLEX_APP_ID
       && process.env.ENABLEX_APP_KEY
       && process.env.ENABLEX_OUTBOUND_NUMBER) {
-    const options = {
-      key: readFileSync(process.env.CERTIFICATE_SSL_KEY).toString(),
-      cert: readFileSync(process.env.CERTIFICATE_SSL_CERT).toString(),
-    };
-    if (process.env.CERTIFICATE_SSL_CACERTS) {
-      options.ca = [];
-      options.ca.push(readFileSync(process.env.CERTIFICATE_SSL_CACERTS).toString());
-    }
+    const options = {};
 
     // Create https express server
     server = createServer(options, app);

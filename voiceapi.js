@@ -60,7 +60,7 @@ function makeOutboundCall(reqDetails, callback) {
         language: 'en-US',
         prompt_ref: '1',
       },
-    }
+    },
   });
 
   connectEnablexServer(postData, (response) => {
@@ -75,10 +75,10 @@ function bridgeCall(voiceId, toNumber, callback) {
   httpOptions.path = `/voice/v1/calls/${voiceId}`;
   httpOptions.method = 'PUT';
   const postData = JSON.stringify({
-      connect: {
-        from: process.env.ENABLEX_OUTBOUND_NUMBER,
-        to: toNumber,
-      },
+    connect: {
+      from: process.env.ENABLEX_OUTBOUND_NUMBER,
+      to: toNumber,
+    },
   });
 
   connectEnablexServer(postData, (response) => {
