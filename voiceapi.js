@@ -46,7 +46,7 @@ const connectEnablexServer = (data, callback) => {
 // Voice API call to make an outbound call
 function makeOutboundCall(reqDetails, callback) {
   logger.info(`Initiating a call from ${process.env.ENABLEX_OUTBOUND_NUMBER} to ${reqDetails.fromNumber}`);
-  httpOptions.path = '/voice/v1/calls';
+  httpOptions.path = '/voice/v1/call';
   httpOptions.method = 'POST';
   const postData = JSON.stringify({
     name: 'TEST_APP',
@@ -72,13 +72,11 @@ function makeOutboundCall(reqDetails, callback) {
 // Voice API calls to bridge two calls
 function bridgeCall(voiceId, toNumber, callback) {
   logger.info(`Bridging the call with id ${voiceId} to ${toNumber}`);
-  httpOptions.path = `/voice/v1/calls/${voiceId}`;
+  httpOptions.path = `/voice/v1/call/${voiceId}/connect`;
   httpOptions.method = 'PUT';
   const postData = JSON.stringify({
-    connect: {
       from: process.env.ENABLEX_OUTBOUND_NUMBER,
-      to: toNumber,
-    },
+      to: toNumber
   });
 
   connectEnablexServer(postData, (response) => {
