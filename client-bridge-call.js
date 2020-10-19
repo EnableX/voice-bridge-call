@@ -1,4 +1,6 @@
 // core modules
+const fs = require('fs');
+const http = require('http');
 const https = require('https');
 // modules installed from npm
 const express = require('express');
@@ -53,24 +55,35 @@ function onError(error) {
 // create and start an HTTPS node app server
 // An SSL Certificate (Self Signed or Registered) is required
 function createAppServer() {
-  if (process.env.ENABLEX_APP_ID
-      && process.env.ENABLEX_APP_KEY
-      && process.env.ENABLEX_OUTBOUND_NUMBER) {
-    const options = {};
-
+  if (process.env.LISTEN_SSL) {
+    const options = {
+      key: fs.readFileSync(process.env.CERTIFICATE_SSL_KEY).toString(),
+      cert: fs.readFileSync(process.env.CERTIFICATE_SSL_CERT).toString(),
+    };
+    if (process.env.CERTIFICATE_SSL_CACERTS) {
+      options.ca = [];
+      options.ca.push(fs.readFileSync(process.env.CERTIFICATE_SSL_CACERTS).toString());
+    }
     // Create https express server
     server = https.createServer(options, app);
-    app.set('port', servicePort);
-    server.listen(servicePort);
-    server.on('error', onError);
-    server.on('listening', onListening);
   } else {
-    logger.error('Please set env variables - ENABLEX_APP_ID, ENABLEX_APP_KEY, ENABLEX_OUTBOUND_NUMBER');
+    // Create http express server
+    server = http.createServer(app);
   }
+  app.set('port', servicePort);
+  server.listen(servicePort);
+  server.on('error', onError);
+  server.on('listening', onListening);
 }
 
 /* Initializing WebServer */
-createAppServer();
+if (process.env.ENABLEX_APP_ID
+  && process.env.ENABLEX_APP_KEY
+  && process.env.ENABLEX_OUTBOUND_NUMBER) {
+  createAppServer();
+} else {
+  logger.error('Please set env variables - ENABLEX_APP_ID, ENABLEX_APP_KEY, ENABLEX_OUTBOUND_NUMBER');
+}
 
 process.on('SIGINT', () => {
   logger.info('Caught interrupt signal');
